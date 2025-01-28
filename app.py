@@ -68,19 +68,19 @@ if uploaded_file:
   base_filename = os.path.splitext(uploaded_file.name)[0]
 
   # Datei exportieren
-  excel_datei = "output.xlsx"
-  with pd.ExcelWriter(excel_datei, engine='openpyxl') as writer:
-    df.to_excel(writer, index=False, sheet_name='Sheet1')
+  def convert_to_excel(df):
+      output = BytesIO()
+      with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+          df.to_excel(writer, index=False, sheet_name="Sheet1")
+          # Spaltenbreiten basierend auf Spaltentiteln anpassen
+          for col_num, column_title in enumerate(df.columns, 1):  # Enumerate beginnt bei 1 für Excel
+            column_width = len(column_title) + 2  # Kleine Puffer hinzufügen
+            worksheet.column_dimensions[chr(64 + col_num)].width = column_width
+      processed_data = output.getvalue()
+      return processed_data
 
-    # Excel-Workbook und Worksheet laden
-    workbook = writer.book
-    worksheet = writer.sheets['Sheet1']
-
-    # Spaltenbreiten basierend auf Spaltentiteln anpassen
-    for col_num, column_title in enumerate(df.columns, 1):  # Enumerate beginnt bei 1 für Excel
-        column_width = len(column_title) + 2  # Kleine Puffer hinzufügen
-        worksheet.column_dimensions[chr(64 + col_num)].width = column_width
+   excel_data = convert_to_excel(df)
 
   # Download-Button
-  st.download_button("Download verarbeitete .xlsx-Datei", data=excel_datei, file_name=base_filename + '.xlsx')
+  st.download_button("Download als Excel", data=excel_data, file_name=base_filename + '.xlsx')
 
