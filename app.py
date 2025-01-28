@@ -80,7 +80,7 @@ if uploaded_file:
       processed_data = output.getvalue()
       return processed_data
 
-   excel_data = convert_to_excel(df)
+  excel_data = convert_to_excel(df)
 
   # Download-Button
   st.download_button("Download als Excel", data=excel_data, file_name=base_filename + '.xlsx')
