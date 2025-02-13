@@ -1,6 +1,9 @@
+pip install xlsxwriter
+
 import streamlit as st
 import pandas as pd
 import os
+import xlsxwriter
 from io import BytesIO
 
 # Seitentitel
@@ -68,14 +71,23 @@ if uploaded_file:
   # Originaldateiname ohne Endung
   base_filename = os.path.splitext(uploaded_file.name)[0]
 
-  # Datei-Exportfunktion mit OpenPyXL
+  # Datei-Exportfunktion
   def convert_to_excel(df):
       output = BytesIO()
-      with pd.ExcelWriter(output, engine="openpyxl") as writer:
+      with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
           df.to_excel(writer, index=False, sheet_name="Sheet1")
-          writer._save()  # Speichert das Dokument explizit in BytesIO
   
-      output.seek(0)
+          # Zugriff auf das Arbeitsblatt
+          worksheet = writer.sheets["Sheet1"]
+  
+          # Spaltenbreiten anpassen
+          for col_num, column_title in enumerate(df.columns):
+              column_width = max(len(str(column_title)) + 2, 10)  # Mindestbreite 10
+              worksheet.set_column(col_num, col_num, column_width)
+  
+          writer.close()
+  
+      output.seek(0)  # Wichtiger Schritt, um den Puffer auf den Anfang zu setzen
       return output
   
   # Datei exportieren
